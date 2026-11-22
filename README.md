@@ -24,17 +24,6 @@ Der Fortschritt wird nur in dem Browser auf dem jeweiligen Gerät gespeichert. E
 2. Öffne das Browser-Menü.
 3. Wähle **„Zum Startbildschirm hinzufügen“** oder **„App installieren“**.
 
-### WebApp veröffentlichen
-
-Die WebApp liegt im Ordner `docs/`. GitHub Pages kann diesen Ordner direkt veröffentlichen:
-
-1. Öffne im Repository **Settings → Pages**.
-2. Wähle bei **Build and deployment** die Option **Deploy from a branch**.
-3. Wähle den Branch `main` und den Ordner `/docs`.
-4. Klicke auf **Save**.
-
-Nach dem Veröffentlichen zeigt GitHub Pages dort die Adresse der WebApp an. Änderungen im Ordner `docs/` werden nach dem Push automatisch veröffentlicht. Ein GitHub Release ist dafür nicht erforderlich.
-
 ## Desktop-App für Windows
 
 Die Desktop-App basiert auf Java 21, JavaFX und Maven. Sie kann mit dem Skript `build-and-create-desktop-shortcut.ps1` gebaut werden. Das Skript erstellt die Windows-App und legt eine Verknüpfung auf dem Desktop an.
