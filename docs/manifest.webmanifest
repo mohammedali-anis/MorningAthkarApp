@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Morgen-Athkar",
+  "short_name": "Athkar",
+  "description": "Deine Morgen-Athkar zum Lesen und Mitzählen.",
+  "lang": "de",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101815",
+  "theme_color": "#101815",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

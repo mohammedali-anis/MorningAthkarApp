@@ -1,0 +1,49 @@
+# Java and Maven build output
+/target/
+/build/
+/out/
+/bin/
+/dist/
+*.class
+*.jar
+*.war
+*.ear
+/JNativeHook-2.2.2.x86_64.dll
+
+# Packaged desktop app images and bundled runtimes
+/MorningAthkar/
+/MorningAthkar-*.exe
+/runtime/
+**/runtime/
+
+# IDE metadata
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Logs and JVM crash reports
+*.log
+hs_err_pid*
+replay_pid*
+
+# Local credentials and machine-specific settings
+.env
+.env.*
+!.env.example
+*.local
+
+# JavaScript package installs (the PWA source in docs/ remains tracked)
+node_modules/
