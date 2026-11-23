@@ -184,29 +184,26 @@ button:disabled { opacity: .42; cursor: default; }
 }
 
 
-/* iPhone Haptic Feedback */
-
-.haptic-count-wrapper {
+/* Keep navigation controls usable above the iPhone haptic touch layer. */
+.app-shell .topbar button,
+.app-shell .routine-tabs,
+.app-shell .controls button:not(#count-button) {
   position: relative;
-  display: flex;
-  min-width: 0;
-}
-
-.haptic-count-wrapper .count-button {
-  width: 100%;
+  z-index: 3;
 }
 
 .ios-haptic-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   opacity: 0;
   z-index: 2;
   cursor: pointer;
-  clip-path: inset(0 round 15px);
+  touch-action: manipulation;
 }
 
 .ios-haptic-overlay[hidden] {
