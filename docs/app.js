@@ -396,6 +396,36 @@ function persistProgressForCurrentDay() {
 }
 
 elements.countButton.addEventListener("click", countOrAdvance);
+
+
+// iPhone Haptic Feedback
+const isIOS =
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (
+    navigator.platform === "MacIntel" &&
+    navigator.maxTouchPoints > 1
+  );
+
+const iosHapticCount = document.querySelector(
+  "#ios-haptic-count"
+);
+
+if (isIOS && iosHapticCount) {
+  // Nativen iOS-Schalter berührbar machen.
+  iosHapticCount.hidden = false;
+
+  iosHapticCount.addEventListener("click", (event) => {
+    // Verhindert doppeltes Zählen durch
+    // den globalen Klick-Handler.
+    event.stopPropagation();
+
+    if (!elements.countButton.disabled) {
+      countOrAdvance();
+    }
+  });
+}
+
+
 function selectRoutine(routine) {
   if ((routine === activeRoutine && elements.shell.dataset.view !== "prayer") || !routines[routine]?.length) return;
   rememberActiveProgress();
