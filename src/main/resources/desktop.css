@@ -39,7 +39,7 @@
     -fx-font-weight: bold;
 }
 
-.icon-button, .tab-button, .secondary-button, .count-button {
+.icon-button, .tab-button, .secondary-button, .count-button, .mawaqit-button {
     -fx-cursor: hand;
     -fx-background-radius: 12px;
     -fx-border-radius: 12px;
@@ -83,7 +83,7 @@
 }
 
 .count-button:hover { -fx-background-color: #329b73; }
-.secondary-button:hover, .icon-button:hover, .tab-button:hover { -fx-background-color: -surface; }
+.secondary-button:hover, .icon-button:hover, .tab-button:hover, .mawaqit-button:hover { -fx-background-color: -surface; }
 .button:disabled { -fx-opacity: 0.43; }
 
 .small-label, .footer-label, .countdown-caption, .hint-label,
@@ -100,7 +100,7 @@
 .progress-bar > .track { -fx-background-color: -edge; -fx-background-radius: 99px; }
 .progress-bar > .bar { -fx-background-color: -green; -fx-background-radius: 99px; }
 
-.reading-card, .prayer-view {
+.reading-card {
     -fx-background-color: -surface;
     -fx-background-radius: 22px;
     -fx-border-color: -edge;
@@ -112,8 +112,44 @@
 .count-caption { -fx-font-size: 13px; }
 .count-value { -fx-text-fill: -green; -fx-font-size: 16px; -fx-font-weight: bold; }
 
-.prayer-source { -fx-font-size: 13px; }
-.prayer-status { -fx-font-size: 12px; -fx-wrap-text: true; }
-.prayer-grid { -fx-padding: 12px 25px; }
-.prayer-name { -fx-font-size: 15px; }
-.prayer-time { -fx-text-fill: -green; -fx-font-size: 16px; -fx-font-weight: bold; }
+.prayer-source { -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: -green; }
+.prayer-status { -fx-font-size: 10px; }
+.prayer-view { -fx-background-color: transparent; }
+.prayer-section-title { -fx-text-fill: -muted; -fx-font-size: 10px; -fx-font-weight: bold; }
+.prayer-hint { -fx-text-fill: -muted; -fx-font-size: 10px; }
+
+.next-prayer-card {
+    -fx-min-height: 88px;
+    -fx-background-color: linear-gradient(to right, #1c4030, #162b23);
+    -fx-background-radius: 18px;
+    -fx-border-color: #348464;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+    -fx-padding: 11px 15px;
+}
+.next-prayer-caption { -fx-text-fill: -green; -fx-font-size: 10px; -fx-font-weight: bold; }
+.next-prayer-name { -fx-text-fill: -ink; -fx-font-size: 25px; -fx-font-weight: bold; }
+.next-prayer-countdown { -fx-text-fill: -green; -fx-font-size: 25px; -fx-font-weight: bold; }
+.next-prayer-detail { -fx-text-fill: -muted; -fx-font-size: 11px; }
+
+.prayer-tile {
+    -fx-min-height: 43px;
+    -fx-pref-height: 43px;
+    -fx-background-color: -control;
+    -fx-background-radius: 13px;
+    -fx-border-color: -edge;
+    -fx-border-radius: 13px;
+    -fx-border-width: 1px;
+    -fx-padding: 7px 12px;
+}
+.prayer-name { -fx-font-size: 12px; }
+.prayer-time { -fx-text-fill: -ink; -fx-font-size: 15px; -fx-font-weight: bold; }
+
+.mawaqit-button {
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-font-size: 12px;
+    -fx-text-fill: -green;
+    -fx-border-color: #326c53;
+    -fx-background-color: -surface;
+}

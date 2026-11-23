@@ -23,7 +23,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
@@ -66,6 +66,8 @@ public class MorningAthkarFxApp extends Application {
     private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
     private static final String[] PRAYER_LABELS =
             {"Fajr", "Sonnenaufgang", "Dhuhr", "Asr", "Maghrib", "Isha"};
+    private static final List<String> NEXT_PRAYERS =
+            List.of("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha");
 
     private final EnumMap<AthkarData.Routine, ProgressState> progressByRoutine =
             new EnumMap<>(AthkarData.Routine.class);
@@ -77,6 +79,7 @@ public class MorningAthkarFxApp extends Application {
     private AthkarData.Routine activeRoutine = AthkarData.Routine.MORNING;
     private LocalDate sessionDate = LocalDate.now();
     private PrayerTimesService.Times prayerTimes;
+    private PrayerTimesService.Times nextDayLocalTimes;
     private boolean prayerTimesLoading;
     private boolean showingPrayerTimes;
     private boolean userSelectedView;
@@ -106,6 +109,9 @@ public class MorningAthkarFxApp extends Application {
     private Label countdownCaption;
     private Label countdownValue;
     private Label prayerStatus;
+    private Label nextPrayerName;
+    private Label nextPrayerCountdown;
+    private Label nextPrayerDetail;
     private ProgressBar progressBar;
     private Button themeButton;
     private Button wakeButton;
@@ -161,7 +167,7 @@ public class MorningAthkarFxApp extends Application {
         stage.setTitle("Athkar & Gebetszeiten");
         stage.setAlwaysOnTop(true);
         stage.setMinWidth(530);
-        stage.setMinHeight(510);
+        stage.setMinHeight(540);
         var iconUrl = getClass().getResource("/morning-athkar.png");
         if (iconUrl != null) stage.getIcons().add(new Image(iconUrl.toExternalForm()));
 
@@ -300,26 +306,60 @@ public class MorningAthkarFxApp extends Application {
     }
 
     private void buildPrayerView() {
-        Label source = styledLabel("Gebetszeiten für Siegen · berechnete Zeiten", "prayer-source");
+        Label source = styledLabel("SIEGEN · HEUTE", "prayer-source");
         prayerStatus = styledLabel("Gebetszeiten werden geladen …", "prayer-status");
-        GridPane grid = new GridPane();
-        grid.getStyleClass().add("prayer-grid");
-        grid.setHgap(25);
-        grid.setVgap(11);
+        Region sourceSpacer = new Region();
+        HBox.setHgrow(sourceSpacer, Priority.ALWAYS);
+        HBox sourceLine = new HBox(8, source, sourceSpacer, prayerStatus);
+        sourceLine.setAlignment(Pos.CENTER_LEFT);
+
+        Label nextCaption = styledLabel("NÄCHSTES GEBET", "next-prayer-caption");
+        nextPrayerName = styledLabel("--", "next-prayer-name");
+        nextPrayerCountdown = styledLabel("--", "next-prayer-countdown");
+        nextPrayerDetail = styledLabel("Heute · --:-- Uhr", "next-prayer-detail");
+        VBox nextPrayerInfo = new VBox(3, nextCaption, nextPrayerName, nextPrayerDetail);
+        nextPrayerInfo.setAlignment(Pos.CENTER_LEFT);
+        Region heroSpacer = new Region();
+        HBox.setHgrow(heroSpacer, Priority.ALWAYS);
+        Label remainingCaption = styledLabel("VERBLEIBEND", "next-prayer-caption");
+        VBox countdownInfo = new VBox(3, remainingCaption, nextPrayerCountdown);
+        countdownInfo.setAlignment(Pos.CENTER_RIGHT);
+        HBox nextCard = new HBox(12, nextPrayerInfo, heroSpacer, countdownInfo);
+        nextCard.setAlignment(Pos.CENTER_LEFT);
+        nextCard.getStyleClass().add("next-prayer-card");
+        nextCard.setMaxWidth(Double.MAX_VALUE);
+
+        Label overviewCaption = styledLabel("GEBETSZEITEN HEUTE", "prayer-section-title");
+        VBox prayerList = new VBox(6);
+        HBox prayerPair = null;
         for (int i = 0; i < PrayerTimesService.PRAYERS.length; i++) {
             String key = PrayerTimesService.PRAYERS[i];
-            grid.add(styledLabel(PRAYER_LABELS[i], "prayer-name"), 0, i);
+            Label name = styledLabel(PRAYER_LABELS[i], "prayer-name");
             Label time = styledLabel("--:--", "prayer-time");
+            Region tileSpacer = new Region();
+            HBox.setHgrow(tileSpacer, Priority.ALWAYS);
+            HBox tile = new HBox(8, name, tileSpacer, time);
+            tile.getStyleClass().add("prayer-tile");
+            tile.setAlignment(Pos.CENTER_LEFT);
+            tile.setMinWidth(0);
+            tile.setPrefWidth(0);
+            tile.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(tile, Priority.ALWAYS);
             prayerTimeLabels.put(key, time);
-            grid.add(time, 1, i);
+            if (i % 2 == 0) {
+                prayerPair = new HBox(8);
+                prayerList.getChildren().add(prayerPair);
+            }
+            prayerPair.getChildren().add(tile);
         }
-        Button mawaqitButton = button("MAWAQIT im Browser öffnen ↗", "count-button",
+        Button mawaqitButton = button("Bilal-Moschee auf MAWAQIT öffnen", "mawaqit-button",
                 "Gebetszeiten der Bilal-Moschee auf MAWAQIT", () -> openExternal(MAWAQIT));
         mawaqitButton.setMaxWidth(Double.MAX_VALUE);
-        prayerView = new VBox(14, source, prayerStatus, grid, mawaqitButton);
+        Label sourceHint = styledLabel("Zeiten können von den Moscheezeiten abweichen", "prayer-hint");
+        prayerView = new VBox(6, sourceLine, nextCard, overviewCaption, prayerList, mawaqitButton, sourceHint);
         prayerView.getStyleClass().add("prayer-view");
-        prayerView.setAlignment(Pos.TOP_CENTER);
-        prayerView.setPadding(new Insets(20));
+        prayerView.setAlignment(Pos.TOP_LEFT);
+        prayerView.setPadding(new Insets(4, 0, 0, 0));
         prayerView.setMinHeight(0);
     }
 
@@ -526,6 +566,7 @@ public class MorningAthkarFxApp extends Application {
         sessionLabel.setText("Sitzung  " + formatDuration(minutes));
         clockLabel.setText(LocalTime.now().format(CLOCK_FORMAT));
         updateCountdown();
+        updateNextPrayer();
     }
 
     private void loadPrayerTimes() {
@@ -554,13 +595,54 @@ public class MorningAthkarFxApp extends Application {
 
     private void renderPrayerTimes() {
         if (prayerTimes == null || !sessionDate.equals(prayerTimes.date())) {
-            prayerStatus.setText("Gebetszeiten konnten nicht geladen werden. MAWAQIT im Browser öffnen.");
+            prayerStatus.setText("Zeiten nicht verfügbar");
             prayerTimeLabels.values().forEach(label -> label.setText("--:--"));
+            updateNextPrayer();
             return;
         }
-        prayerStatus.setText("Heute, " + sessionDate.format(DATE_FORMAT)
-                + (prayerTimes.locallyCalculated() ? " · lokal berechnet (Näherung)" : " · Aladhan"));
+        prayerStatus.setText(prayerTimes.locallyCalculated()
+                ? "Lokal berechnet · Näherung" : "Berechnet mit Aladhan");
         prayerTimeLabels.forEach((name, label) -> label.setText(prayerTimes.get(name).format(CLOCK_FORMAT)));
+        updateNextPrayer();
+    }
+
+    private void updateNextPrayer() {
+        if (prayerTimes == null || !sessionDate.equals(prayerTimes.date())) {
+            nextPrayerName.setText("--");
+            nextPrayerCountdown.setText("--");
+            nextPrayerDetail.setText("Gebetszeiten nicht verfügbar");
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        String nextKey = null;
+        LocalDateTime nextAt = null;
+        boolean tomorrow = false;
+        for (String key : NEXT_PRAYERS) {
+            LocalDateTime candidate = sessionDate.atTime(prayerTimes.get(key));
+            if (candidate.isAfter(now)) {
+                nextKey = key;
+                nextAt = candidate;
+                break;
+            }
+        }
+        if (nextAt == null) {
+            tomorrow = true;
+            nextKey = "Fajr";
+            LocalDate nextDay = sessionDate.plusDays(1);
+            if (nextDayLocalTimes == null || !nextDay.equals(nextDayLocalTimes.date())) {
+                nextDayLocalTimes = prayerService.localFor(nextDay);
+            }
+            nextAt = nextDay.atTime(nextDayLocalTimes.get("Fajr"));
+        }
+
+        long seconds = Duration.between(now, nextAt).getSeconds();
+        long remainingMinutes = Math.max(0, (seconds + 59) / 60);
+        nextPrayerName.setText(nextKey);
+        nextPrayerCountdown.setText(formatDuration(remainingMinutes));
+        boolean approximate = tomorrow || prayerTimes.locallyCalculated();
+        nextPrayerDetail.setText((tomorrow ? "Morgen" : "Heute") + " · "
+                + (approximate ? "ca. " : "") + nextAt.toLocalTime().format(CLOCK_FORMAT) + " Uhr");
     }
 
     private void updateCountdown() {
