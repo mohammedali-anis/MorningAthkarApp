@@ -1,9 +1,3 @@
-Ich will so wenn موعد اذكار الصباح الان dann اذكار ااصباح Tap ist defult bei starten das App
-
-Und wenn اذكار المساء dann اذكار المساء Tap ist default bei starten des apps
-
-Wenn weder noch dann اوقات الصلاة 
-
 const STORAGE_KEY = "morning-athkar-progress-v1";
 const THEME_KEY = "morning-athkar-theme-v1";
 const PRAYER_TIMES_KEY = "morning-athkar-city-times-v2";
