@@ -48,6 +48,7 @@ let sessionDate = localDay();
 let audioContext;
 let prayerTimes = null;
 let prayerTimesLoading = false;
+let userSelectedView = false;
 let keepScreenAwake = false;
 let screenWakeLock = null;
 let screenWakeLockRequest = null;
@@ -342,10 +343,9 @@ function renderPrayerCountdown() {
     return;
   }
 
-  if (
-    !prayerTimes ||
-    prayerTimes.date !== localDay()
-  ) {
+  const windowTimes = routineWindow(activeRoutine);
+
+  if (!windowTimes) {
     elements.windowCountdownLabel.textContent =
       "تعذر تحميل مواقيت الصلاة";
 
@@ -355,40 +355,8 @@ function renderPrayerCountdown() {
     return;
   }
 
-  const isMorning =
-    activeRoutine === "morning";
-
-  const startTime = isMorning
-    ? prayerTimes.fajr
-    : prayerTimes.asr;
-
-  const endPrayerTime = isMorning
-    ? prayerTimes.dhuhr
-    : prayerTimes.maghrib;
-
-  const [startHours, startMinutes] =
-    startTime.split(":").map(Number);
-
-  const [endHours, endMinutes] =
-    endPrayerTime.split(":").map(Number);
-
-  const start = new Date();
-
-  start.setHours(
-    startHours,
-    startMinutes,
-    0,
-    0
-  );
-
-  const end = new Date();
-
-  end.setHours(
-    endHours,
-    endMinutes - 15,
-    0,
-    0
-  );
+  const isMorning = activeRoutine === "morning";
+  const { start, end } = windowTimes;
 
   const now = Date.now();
 
@@ -418,6 +386,22 @@ function renderPrayerCountdown() {
 
   elements.windowCountdownValue.textContent =
     formatDuration(remainingMinutes);
+}
+
+function routineWindow(routine, now = new Date()) {
+  if (!prayerTimes || prayerTimes.date !== localDay(now)) return null;
+
+  const startTime = routine === "morning" ? prayerTimes.fajr : prayerTimes.asr;
+  const endTime = routine === "morning" ? prayerTimes.dhuhr : prayerTimes.maghrib;
+  if (!startTime || !endTime) return null;
+
+  const [startHours, startMinutes] = startTime.split(":").map(Number);
+  const [endHours, endMinutes] = endTime.split(":").map(Number);
+  const start = new Date(now);
+  const end = new Date(now);
+  start.setHours(startHours, startMinutes, 0, 0);
+  end.setHours(endHours, endMinutes - 15, 0, 0);
+  return { start, end };
 }
 
 function formatDuration(totalMinutes) {
@@ -995,43 +979,61 @@ function selectRoutine(routine) {
 
 elements.morningTab.addEventListener(
   "click",
-  () => selectRoutine("morning")
+  () => {
+    userSelectedView = true;
+    selectRoutine("morning");
+  }
 );
 
 elements.eveningTab.addEventListener(
   "click",
-  () => selectRoutine("evening")
+  () => {
+    userSelectedView = true;
+    selectRoutine("evening");
+  }
 );
+
+function selectPrayerView() {
+  elements.shell.dataset.view = "prayer";
+  elements.prayerPanel.hidden = false;
+
+  elements.routineEyebrow.textContent =
+    "MAWAQIT · SIEGEN";
+
+  elements.routineTitle.textContent =
+    "Gebetszeiten";
+
+  document.title =
+    "Gebetszeiten · Siegen";
+
+  elements.morningTab.setAttribute("aria-selected", "false");
+  elements.eveningTab.setAttribute("aria-selected", "false");
+  elements.prayerTab.setAttribute("aria-selected", "true");
+  updateIOSHapticOverlay();
+}
+
+function selectDefaultView() {
+  const now = new Date();
+  const morning = routineWindow("morning", now);
+  if (morning && now >= morning.start && now < morning.end) {
+    selectRoutine("morning");
+    return;
+  }
+
+  const evening = routineWindow("evening", now);
+  if (evening && now >= evening.start && now < evening.end) {
+    selectRoutine("evening");
+    return;
+  }
+
+  selectPrayerView();
+}
 
 elements.prayerTab.addEventListener(
   "click",
   () => {
-    elements.shell.dataset.view = "prayer";
-    elements.prayerPanel.hidden = false;
-
-    elements.routineEyebrow.textContent =
-      "MAWAQIT · SIEGEN";
-
-    elements.routineTitle.textContent =
-      "Gebetszeiten";
-
-    document.title =
-      "Gebetszeiten · Siegen";
-
-    elements.morningTab.setAttribute(
-      "aria-selected",
-      "false"
-    );
-
-    elements.eveningTab.setAttribute(
-      "aria-selected",
-      "false"
-    );
-
-    elements.prayerTab.setAttribute(
-      "aria-selected",
-      "true"
-    );
+    userSelectedView = true;
+    selectPrayerView();
   }
 );
 
@@ -1278,13 +1280,17 @@ async function start() {
 
     loadProgress();
 
+    prayerTimes = loadCachedPrayerTimes();
+    selectDefaultView();
     render();
 
     updateClocks();
 
     loadDeploymentDate();
 
-    loadPrayerTimes();
+    loadPrayerTimes().then(() => {
+      if (!userSelectedView) selectDefaultView();
+    });
 
     window.setInterval(
       updateClocks,

@@ -79,6 +79,8 @@ public class MorningAthkarFxApp extends Application {
     private PrayerTimesService.Times prayerTimes;
     private boolean prayerTimesLoading;
     private boolean showingPrayerTimes;
+    private boolean userSelectedView;
+    private boolean initialPrayerLoadPending = true;
     private boolean darkTheme;
     private boolean keepScreenAwake;
     private boolean altDown;
@@ -148,6 +150,7 @@ public class MorningAthkarFxApp extends Application {
         render();
         updateClocks();
         loadPrayerTimes();
+        selectDefaultView();
         startTimers();
         installGlobalHotkey();
         stage.show();
@@ -181,9 +184,18 @@ public class MorningAthkarFxApp extends Application {
         HBox topbar = new HBox(9, appIcon, branding, themeButton, wakeButton, resetButton);
         topbar.setAlignment(Pos.CENTER_LEFT);
 
-        morningTab = button("أذكار الصباح", "tab-button", "Morgen-Athkar", () -> selectRoutine(AthkarData.Routine.MORNING));
-        eveningTab = button("أذكار المساء", "tab-button", "Abend-Athkar", () -> selectRoutine(AthkarData.Routine.EVENING));
-        prayerTab = button("أوقات الصلاة", "tab-button", "Gebetszeiten", this::selectPrayerTimes);
+        morningTab = button("أذكار الصباح", "tab-button", "Morgen-Athkar", () -> {
+            userSelectedView = true;
+            selectRoutine(AthkarData.Routine.MORNING);
+        });
+        eveningTab = button("أذكار المساء", "tab-button", "Abend-Athkar", () -> {
+            userSelectedView = true;
+            selectRoutine(AthkarData.Routine.EVENING);
+        });
+        prayerTab = button("أوقات الصلاة", "tab-button", "Gebetszeiten", () -> {
+            userSelectedView = true;
+            selectPrayerTimes();
+        });
         HBox tabs = new HBox(8, morningTab, eveningTab, prayerTab);
         for (Button tab : List.of(morningTab, eveningTab, prayerTab)) {
             tab.setMaxWidth(Double.MAX_VALUE);
@@ -360,6 +372,25 @@ public class MorningAthkarFxApp extends Application {
         render();
     }
 
+    private void selectDefaultView() {
+        LocalTime now = LocalTime.now();
+        if (isWithinRoutineWindow(AthkarData.Routine.MORNING, now)) {
+            selectRoutine(AthkarData.Routine.MORNING);
+        } else if (isWithinRoutineWindow(AthkarData.Routine.EVENING, now)) {
+            selectRoutine(AthkarData.Routine.EVENING);
+        } else {
+            selectPrayerTimes();
+        }
+    }
+
+    private boolean isWithinRoutineWindow(AthkarData.Routine routine, LocalTime now) {
+        if (prayerTimes == null || !sessionDate.equals(prayerTimes.date())) return false;
+        boolean morning = routine == AthkarData.Routine.MORNING;
+        LocalTime start = prayerTimes.get(morning ? "Fajr" : "Asr");
+        LocalTime end = prayerTimes.get(morning ? "Dhuhr" : "Maghrib").minusMinutes(15);
+        return !now.isBefore(start) && now.isBefore(end);
+    }
+
     private void showDhikr(int index) {
         List<AthkarData.Dhikr> entries = routines.get(activeRoutine);
         if (index < 0 || index >= entries.size()) return;
@@ -514,6 +545,10 @@ public class MorningAthkarFxApp extends Application {
             if (error == null) prayerTimes = times;
             renderPrayerTimes();
             updateCountdown();
+            if (initialPrayerLoadPending) {
+                initialPrayerLoadPending = false;
+                if (!userSelectedView) selectDefaultView();
+            }
         }));
     }
 
@@ -537,10 +572,9 @@ public class MorningAthkarFxApp extends Application {
             return;
         }
 
-        LocalTime start = prayerTimes.get(morning ? "Fajr" : "Asr");
         LocalTime end = prayerTimes.get(morning ? "Dhuhr" : "Maghrib").minusMinutes(15);
         LocalTime now = LocalTime.now();
-        if (now.isBefore(start) || !now.isBefore(end)) {
+        if (!isWithinRoutineWindow(activeRoutine, now)) {
             countdownCaption.setText(morning ? "ليس وقت أذكار الصباح" : "ليس وقت أذكار المساء");
             countdownValue.setText("--");
             return;
