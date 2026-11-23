@@ -28,6 +28,8 @@ Der Fortschritt wird nur in dem Browser auf dem jeweiligen Gerät gespeichert. E
 
 Die Desktop-App basiert auf Java 21, JavaFX und Maven. Sie kann mit dem Skript `build-and-create-desktop-shortcut.ps1` gebaut werden. Das Skript erstellt die Windows-App und legt eine Verknüpfung auf dem Desktop an.
 
+Die Desktop-App verwendet dieselbe `docs/athkar.json` wie die WebApp. Sie bietet Morgen- und Abend-Athkar, getrennten Tagesfortschritt, Gebetszeiten und einen Countdown für Siegen, Zählen per Klick und Alt + Leertaste, Original- und Dunkelmodus sowie einen Schalter zum Wachhalten des Bildschirms. Beim letzten Zählschritt gibt Windows einen kurzen Ton aus. Die Gebetszeiten im Fenster kommen normalerweise von Aladhan. Ohne API-Verbindung berechnet die App ungefähre Zeiten lokal und kennzeichnet sie entsprechend. Die MAWAQIT-Seite der Bilal-Moschee lässt sich mit der Schaltfläche im Browser öffnen; die berechneten Zeiten können von den Moschee-Zeiten abweichen.
+
 Benötigt werden:
 
 - Windows

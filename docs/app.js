@@ -350,7 +350,7 @@ function renderPrayerCountdown() {
       "تعذر تحميل مواقيت الصلاة";
 
     elements.windowCountdownValue.textContent =
-      "--:--";
+      "--";
 
     return;
   }
@@ -402,7 +402,7 @@ function renderPrayerCountdown() {
         : "ليس وقت أذكار المساء";
 
     elements.windowCountdownValue.textContent =
-      "--:--";
+      "--";
 
     return;
   }
@@ -411,21 +411,19 @@ function renderPrayerCountdown() {
     (end.getTime() - now) / 60_000
   );
 
-  const hoursLeft = String(
-    Math.floor(remainingMinutes / 60)
-  ).padStart(2, "0");
-
-  const minutesLeft = String(
-    remainingMinutes % 60
-  ).padStart(2, "0");
-
   elements.windowCountdownLabel.textContent =
     isMorning
       ? "المتبقي حتى خروج وقت أذكار الصباح"
       : "المتبقي حتى خروج وقت أذكار المساء";
 
   elements.windowCountdownValue.textContent =
-    `${hoursLeft}:${minutesLeft}`;
+    formatDuration(remainingMinutes);
+}
+
+function formatDuration(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
 }
 
 
@@ -835,16 +833,8 @@ function updateClocks() {
     (Date.now() - sessionStartedAt) / 60_000
   );
 
-  const hours = String(
-    Math.floor(elapsedMinutes / 60)
-  ).padStart(2, "0");
-
-  const minutes = String(
-    elapsedMinutes % 60
-  ).padStart(2, "0");
-
   elements.session.textContent =
-    `Sitzung  ${hours}:${minutes}`;
+    `Sitzung  ${formatDuration(elapsedMinutes)}`;
 
   elements.clock.textContent =
     new Intl.DateTimeFormat("de-DE", {

@@ -36,7 +36,7 @@ try {
     }
 
     Write-Host 'Baue die JavaFX-Anwendung und sammle Laufzeitbibliotheken ...'
-    & $maven '-f' 'pom.xml' 'compile' 'jar:jar' 'dependency:copy-dependencies' `
+    & $maven '-f' 'pom.xml' 'clean' 'compile' 'jar:jar' 'dependency:copy-dependencies' `
         '-DincludeScope=runtime' "-DoutputDirectory=$libraryDirectory"
     if ($LASTEXITCODE -ne 0) {
         throw "Maven ist mit Exit-Code $LASTEXITCODE fehlgeschlagen."
@@ -56,7 +56,7 @@ try {
     & $jpackage '--type' 'app-image' '--dest' (Join-Path $projectRoot 'dist') '--name' $appName `
         '--input' $inputDirectory '--main-jar' $mainJar '--main-class' 'MorningAthkarFxApp' `
         '--icon' $iconPath `
-        '--java-options' '--module-path=$APPDIR/javafx --add-modules=javafx.controls -Djava.library.path=$APPDIR'
+        '--java-options' '--module-path=$APPDIR/javafx --add-modules=javafx.controls,java.desktop -Djava.library.path=$APPDIR'
     if ($LASTEXITCODE -ne 0) {
         throw "jpackage ist mit Exit-Code $LASTEXITCODE fehlgeschlagen."
     }
