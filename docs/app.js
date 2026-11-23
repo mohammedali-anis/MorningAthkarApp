@@ -446,26 +446,16 @@ document.addEventListener("visibilitychange", () => {
 });
 
 
-
 async function loadDeploymentDate() {
   const element = document.querySelector("#deployment-date");
   if (!element) return;
 
-  const owner = "mohammedali-anis";
-  const repo = "MorningAthkarApp";
+  const url =
+    "https://api.github.com/repos/mohammedali-anis/MorningAthkarApp/commits?sha=main&path=docs&per_page=1";
 
-  const baseUrl =
-    `https://api.github.com/repos/${owner}/${repo}`;
-
-  const cacheKey = "morning-athkar-deployment-v2";
+  const cacheKey = "morning-athkar-last-update";
 
   function formatDate(timestamp) {
-    const date = new Date(timestamp);
-
-    if (Number.isNaN(date.getTime())) {
-      throw new Error("Ungültiges Datum");
-    }
-
     const parts = Object.fromEntries(
       new Intl.DateTimeFormat("de-DE", {
         timeZone: "Europe/Berlin",
@@ -476,12 +466,58 @@ async function loadDeploymentDate() {
         minute: "2-digit",
         hourCycle: "h23",
       })
-        .formatToParts(date)
+        .formatToParts(new Date(timestamp))
         .map(({ type, value }) => [type, value])
     );
 
     return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
   }
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        Accept: "application/vnd.github+json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API: ${response.status}`);
+    }
+
+    const commits = await response.json();
+    const timestamp = commits[0]?.commit?.committer?.date;
+
+    if (!timestamp) {
+      throw new Error("Kein Commit-Datum gefunden");
+    }
+
+    const formatted = formatDate(timestamp);
+
+    element.textContent = `Letztes App-Update: ${formatted}`;
+
+    try {
+      localStorage.setItem(cacheKey, timestamp);
+    } catch {
+      // Speicherung optional.
+    }
+  } catch (error) {
+    console.warn("App-Update konnte nicht geladen werden:", error);
+
+    let cached = null;
+
+    try {
+      cached = localStorage.getItem(cacheKey);
+    } catch {
+      // Kein Cache verfügbar.
+    }
+
+    element.textContent = cached
+      ? `Letztes App-Update: ${formatDate(cached)}`
+      : "Letztes App-Update: Nicht verfügbar";
+  }
+}
+
 
   function showDate(timestamp, label = "Deployment") {
     const formatted = formatDate(timestamp);
