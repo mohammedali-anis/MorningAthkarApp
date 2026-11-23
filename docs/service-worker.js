@@ -1,4 +1,4 @@
-const CACHE_NAME = "morning-athkar-v24";
+const CACHE_NAME = "morning-athkar-v25";
 const APP_FILES = [
   "./",
   "./index.html",
