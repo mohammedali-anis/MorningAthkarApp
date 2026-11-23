@@ -446,16 +446,59 @@ document.addEventListener("visibilitychange", () => {
 });
 
 
+
 async function loadDeploymentDate() {
   const element = document.querySelector("#deployment-date");
   if (!element) return;
-  
+
   const owner = "mohammedali-anis";
   const repo = "MorningAthkarApp";
 
-  try {
-    const url = `https://api.github.com/repos/${owner}/${repo}/pages/builds?per_page=20`;
+  const baseUrl =
+    `https://api.github.com/repos/${owner}/${repo}`;
 
+  const cacheKey = "morning-athkar-deployment-v2";
+
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) {
+      throw new Error("Ungültiges Datum");
+    }
+
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("de-DE", {
+        timeZone: "Europe/Berlin",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      })
+        .formatToParts(date)
+        .map(({ type, value }) => [type, value])
+    );
+
+    return `${parts.day}.${parts.month}.${parts.year} - ${parts.hour}:${parts.minute}`;
+  }
+
+  function showDate(timestamp, label = "Deployment") {
+    const formatted = formatDate(timestamp);
+
+    element.textContent = `${label}: ${formatted}`;
+
+    try {
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({ timestamp, label })
+      );
+    } catch {
+      // Anzeige funktioniert ohne Local Storage.
+    }
+  }
+
+  async function getJson(url) {
     const response = await fetch(url, {
       cache: "no-store",
       headers: {
@@ -464,49 +507,90 @@ async function loadDeploymentDate() {
     });
 
     if (!response.ok) {
-      throw new Error("GitHub API nicht erreichbar");
+      throw new Error(`GitHub API: HTTP ${response.status}`);
     }
 
-    const builds = await response.json();
+    return response.json();
+  }
+
+  // 1. Erfolgreichen GitHub-Pages-Build suchen.
+  try {
+    const builds = await getJson(
+      `${baseUrl}/pages/builds?per_page=20`
+    );
 
     const latest = builds.find(
-      (build) => build.status === "built"
+      build => build.status === "built" && build.updated_at
     );
 
-    if (!latest) {
-      throw new Error("Kein erfolgreicher Build gefunden");
+    if (latest) {
+      showDate(latest.updated_at);
+      return;
     }
-
-    const date = new Date(latest.updated_at);
-
-    const formatted = new Intl.DateTimeFormat("de-DE", {
-      timeZone: "Europe/Berlin",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    }).format(date);
-
-    element.textContent = `Deployment: ${formatted}`;
-
-    localStorage.setItem(
-      "morning-athkar-last-deployment",
-      formatted
-    );
   } catch (error) {
-    console.warn("Deployment-Datum:", error);
+    console.warn("Pages-Build nicht verfügbar:", error);
+  }
 
-    const cached = localStorage.getItem(
-      "morning-athkar-last-deployment"
+  // 2. Erfolgreiches GitHub-Pages-Deployment suchen.
+  try {
+    const deployments = await getJson(
+      `${baseUrl}/deployments?environment=github-pages&per_page=10`
     );
 
-    element.textContent = cached
-      ? `Deployment: ${cached}`
-      : "Deployment: Nicht verfügbar";
+    for (const deployment of deployments) {
+      const statuses = await getJson(
+        `${baseUrl}/deployments/${deployment.id}/statuses?per_page=10`
+      );
+
+      const latestStatus = statuses[0];
+
+      if (
+        latestStatus?.state === "success" &&
+        latestStatus.created_at
+      ) {
+        showDate(latestStatus.created_at);
+        return;
+      }
+    }
+  } catch (error) {
+    console.warn("Deployment-Status nicht verfügbar:", error);
   }
+
+  // 3. Fallback: Letzte Änderung im docs/-Ordner.
+  try {
+    const commits = await getJson(
+      `${baseUrl}/commits?sha=main&path=docs&per_page=1`
+    );
+
+    const timestamp =
+      commits[0]?.commit?.committer?.date;
+
+    if (timestamp) {
+      showDate(timestamp, "Letztes App-Update");
+      return;
+    }
+  } catch (error) {
+    console.warn("Commit-Datum nicht verfügbar:", error);
+  }
+
+  // 4. Offline-Fallback: Zuletzt gespeichertes Datum.
+  try {
+    const cached = JSON.parse(
+      localStorage.getItem(cacheKey) || "null"
+    );
+
+    if (cached?.timestamp) {
+      element.textContent =
+        `${cached.label || "Deployment"}: ${formatDate(cached.timestamp)}`;
+      return;
+    }
+  } catch {
+    // Kein gültiger Cache vorhanden.
+  }
+
+  element.textContent = "Deployment: Nicht verfügbar";
 }
+
 
 async function start() {
   try {
