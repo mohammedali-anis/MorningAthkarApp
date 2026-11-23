@@ -445,6 +445,69 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+
+async function loadDeploymentDate() {
+  const element = document.querySelector("#deployment-date");
+  if (!element) return;
+  
+  const owner = "mohammedali-anis";
+  const repo = "MorningAthkarApp";
+
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/pages/builds?per_page=20`;
+
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        Accept: "application/vnd.github+json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("GitHub API nicht erreichbar");
+    }
+
+    const builds = await response.json();
+
+    const latest = builds.find(
+      (build) => build.status === "built"
+    );
+
+    if (!latest) {
+      throw new Error("Kein erfolgreicher Build gefunden");
+    }
+
+    const date = new Date(latest.updated_at);
+
+    const formatted = new Intl.DateTimeFormat("de-DE", {
+      timeZone: "Europe/Berlin",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).format(date);
+
+    element.textContent = `Deployment: ${formatted}`;
+
+    localStorage.setItem(
+      "morning-athkar-last-deployment",
+      formatted
+    );
+  } catch (error) {
+    console.warn("Deployment-Datum:", error);
+
+    const cached = localStorage.getItem(
+      "morning-athkar-last-deployment"
+    );
+
+    element.textContent = cached
+      ? `Deployment: ${cached}`
+      : "Deployment: Nicht verfügbar";
+  }
+}
+
 async function start() {
   try {
     const response = await fetch("./athkar.json");
@@ -457,6 +520,7 @@ async function start() {
     loadProgress();
     render();
     updateClocks();
+    loadDeploymentDate();
     loadPrayerTimes();
     window.setInterval(updateClocks, 1000);
     window.setInterval(loadPrayerTimes, 15 * 60 * 1000);
