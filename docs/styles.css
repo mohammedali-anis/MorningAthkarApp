@@ -171,6 +171,18 @@ button:disabled { opacity: .42; cursor: default; }
 .developer-credit a:focus-visible { outline: 2px solid #a0e7c3; outline-offset: 3px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+.deployment-info {
+  display: block;
+  color: var(--muted);
+  font-size: 0.63rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+  text-align: center;
+  white-space: nowrap;
+}
+
 @media (min-width: 560px) {
   .app-shell { padding-top: 32px; padding-bottom: 24px; gap: 22px; }
 }
