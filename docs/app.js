@@ -85,7 +85,7 @@ function applyTheme(theme, save = false) {
 
   document.querySelector(
     'meta[name="theme-color"]'
-  ).content = dark ? "#080d0b" : "#101815";
+  ).content = dark ? "#080d0b" : "#0c1713";
 
   if (!save) return;
 
@@ -297,8 +297,8 @@ async function loadPrayerTimes() {
     };
 
     if (
-      Object.values(times).some(
-        (time) => !time
+      ["fajr", "dhuhr", "asr", "maghrib"].some(
+        (key) => !times[key]
       )
     ) {
       throw new Error(
@@ -409,7 +409,6 @@ function formatDuration(totalMinutes) {
   const minutes = totalMinutes % 60;
   return `${hours}h ${minutes}m`;
 }
-
 
 // ==========================================
 // PROGRESS
@@ -811,6 +810,7 @@ function updateClocks() {
     count = 0;
 
     render();
+    loadPrayerTimes();
   }
 
   const elapsedMinutes = Math.floor(

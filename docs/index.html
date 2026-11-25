@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#101815">
+    <meta name="theme-color" content="#0c1713">
     <meta name="description" content="Morgen- und Abend-Athkar sowie Gebetszeiten der Bilal-Moschee in Siegen.">
     <title>Athkar &amp; Gebetszeiten</title>
     <link rel="manifest" href="./manifest.webmanifest">
@@ -29,11 +29,13 @@
           <span class="eyebrow" id="routine-eyebrow">MORGENROUTINE</span>
           <h1 id="routine-title">Deine Morgen-Athkar</h1>
         </div>
-        <button class="icon-button" id="theme-button" type="button" aria-label="Darkmodus aktivieren" title="Darkmodus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
-        <button class="icon-button" id="screen-wake-button" type="button" aria-label="Bildschirm wach halten aktivieren" title="Bildschirm wach halten aktivieren" aria-pressed="false">
-          <img class="wake-screen-icon" src="./icons/screen-wake.png" alt="">
-        </button>
-        <button class="icon-button" id="reset-button" type="button" aria-label="Zur ersten Erinnerung" title="Zum Anfang">↺</button>
+        <div class="header-actions">
+          <button class="icon-button" id="theme-button" type="button" aria-label="Darkmodus aktivieren" title="Darkmodus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
+          <button class="icon-button" id="screen-wake-button" type="button" aria-label="Bildschirm wach halten aktivieren" title="Bildschirm wach halten aktivieren" aria-pressed="false">
+            <img class="wake-screen-icon" src="./icons/screen-wake.png" alt="">
+          </button>
+          <button class="icon-button" id="reset-button" type="button" aria-label="Zur ersten Erinnerung" title="Zum Anfang">↺</button>
+        </div>
       </header>
 
       <nav class="routine-tabs" role="tablist" aria-label="App-Bereich auswählen" lang="ar" dir="rtl">
@@ -45,12 +47,12 @@
       <section class="prayer-panel" id="prayer-panel" role="tabpanel" aria-label="Gebetszeiten der Bilal-Moschee in Siegen" hidden>
         <div class="prayer-source">
           <span>مسجد بلال · Siegen</span>
-          <a href="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany" target="_blank" rel="noopener noreferrer">Auf Mawaqit öffnen ↗</a>
+          <a href="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany" target="_blank" rel="noopener noreferrer">Im Browser öffnen <span aria-hidden="true">↗</span></a>
         </div>
         <iframe
           class="prayer-frame"
           src="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany"
-          title="Gebetszeiten der Bilal-Moschee in Siegen auf Mawaqit"
+          title="Gebetszeiten der Bilal-Moschee in Siegen auf MAWAQIT"
           loading="lazy"
           referrerpolicy="strict-origin-when-cross-origin"
           allow="fullscreen"
