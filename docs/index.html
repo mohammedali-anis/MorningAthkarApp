@@ -1,127 +1,125 @@
 <!doctype html>
 <html lang="de">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0c1713">
-    <meta name="description" content="Morgen- und Abend-Athkar sowie Gebetszeiten der Bilal-Moschee in Siegen.">
-    <title>Athkar &amp; Gebetszeiten</title>
-    <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="icon" href="./icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-    <script>
-      try {
-        if (localStorage.getItem("morning-athkar-theme-v1") === "dark") {
-          document.documentElement.dataset.theme = "dark";
-        }
-      } catch {
-        // Keep the original appearance if browser storage is unavailable.
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101815">
+  <meta name="description" content="Morgen- und Abend-Athkar sowie Gebetszeiten der Bilal-Moschee in Siegen.">
+  <title>Athkar &amp; Gebetszeiten</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <script>
+    try {
+      if (localStorage.getItem("morning-athkar-theme-v1") === "dark") {
+        document.documentElement.dataset.theme = "dark";
       }
-    </script>
-    <link rel="stylesheet" href="./styles.css">
-    <script src="./app.js" defer></script>
-  </head>
-  <body>
-    <main class="app-shell">
-      <header class="topbar">
-        <img class="app-icon" src="./icon.svg" alt="" width="42" height="42">
-        <div class="brand-copy">
-          <span class="eyebrow" id="routine-eyebrow">MORGENROUTINE</span>
-          <h1 id="routine-title">Deine Morgen-Athkar</h1>
-        </div>
-        <div class="header-actions">
-          <button class="icon-button" id="theme-button" type="button" aria-label="Darkmodus aktivieren" title="Darkmodus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
-          <button class="icon-button" id="screen-wake-button" type="button" aria-label="Bildschirm wach halten aktivieren" title="Bildschirm wach halten aktivieren" aria-pressed="false">
-            <img class="wake-screen-icon" src="./icons/screen-wake.png" alt="">
-          </button>
-          <button class="icon-button" id="reset-button" type="button" aria-label="Zur ersten Erinnerung" title="Zum Anfang">↺</button>
-        </div>
-      </header>
+    } catch {
+      // Keep the original appearance if browser storage is unavailable.
+    }
+  </script>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+<main class="app-shell">
+  <header class="topbar">
+    <img class="app-icon" src="./icon.svg" alt="" width="42" height="42">
+    <div class="brand-copy">
+      <span class="eyebrow" id="routine-eyebrow">MORGENROUTINE</span>
+      <h1 id="routine-title">Deine Morgen-Athkar</h1>
+    </div>
+    <button class="icon-button" id="theme-button" type="button" aria-label="Darkmodus aktivieren" title="Darkmodus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
+    <button class="icon-button" id="screen-wake-button" type="button" aria-label="Bildschirm wach halten aktivieren" title="Bildschirm wach halten aktivieren" aria-pressed="false">
+      <img class="wake-screen-icon" src="./icons/screen-wake.png" alt="">
+    </button>
+    <button class="icon-button" id="reset-button" type="button" aria-label="Zur ersten Erinnerung" title="Zum Anfang">↺</button>
+  </header>
 
-      <nav class="routine-tabs" role="tablist" aria-label="App-Bereich auswählen" lang="ar" dir="rtl">
-        <button class="routine-tab" id="morning-tab" type="button" role="tab" aria-selected="true" aria-controls="athkar-panel">أذكار الصباح</button>
-        <button class="routine-tab" id="evening-tab" type="button" role="tab" aria-selected="false" aria-controls="athkar-panel">أذكار المساء</button>
-        <button class="routine-tab" id="prayer-tab" type="button" role="tab" aria-selected="false" aria-controls="prayer-panel">أوقات الصلاة</button>
-      </nav>
+  <nav class="routine-tabs" role="tablist" aria-label="App-Bereich auswählen" lang="ar" dir="rtl">
+    <button class="routine-tab" id="morning-tab" type="button" role="tab" aria-selected="true" aria-controls="athkar-panel">أذكار الصباح</button>
+    <button class="routine-tab" id="evening-tab" type="button" role="tab" aria-selected="false" aria-controls="athkar-panel">أذكار المساء</button>
+    <button class="routine-tab" id="prayer-tab" type="button" role="tab" aria-selected="false" aria-controls="prayer-panel">أوقات الصلاة</button>
+  </nav>
 
-      <section class="prayer-panel" id="prayer-panel" role="tabpanel" aria-label="Gebetszeiten der Bilal-Moschee in Siegen" hidden>
-        <div class="prayer-source">
-          <span>مسجد بلال · Siegen</span>
-          <a href="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany" target="_blank" rel="noopener noreferrer">Im Browser öffnen <span aria-hidden="true">↗</span></a>
-        </div>
-        <iframe
-          class="prayer-frame"
-          src="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany"
-          title="Gebetszeiten der Bilal-Moschee in Siegen auf MAWAQIT"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="fullscreen"
-        ></iframe>
-      </section>
+  <section class="prayer-panel" id="prayer-panel" role="tabpanel" aria-label="Gebetszeiten der Bilal-Moschee in Siegen" hidden>
+    <div class="prayer-source">
+      <span>مسجد بلال · Siegen</span>
+      <a href="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany" target="_blank" rel="noopener noreferrer">Auf Mawaqit öffnen ↗</a>
+    </div>
+    <iframe
+            class="prayer-frame"
+            src="https://admin.mawaqit.net/ar/msjd-bll-siegen-57076-germany"
+            title="Gebetszeiten der Bilal-Moschee in Siegen auf Mawaqit"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="fullscreen"
+    ></iframe>
+  </section>
 
-      <section class="session" aria-label="Fortschritt">
-        <div class="session-meta">
-          <span id="page-label">1 / 23</span>
-          <span id="date-label"></span>
-        </div>
-        <div class="progress-track" role="progressbar" aria-label="Athkar-Fortschritt" aria-valuemin="1" aria-valuemax="23" aria-valuenow="1">
-          <div class="progress-value" id="progress-value"></div>
-        </div>
-        <div class="window-countdown" aria-live="polite">
-          <span id="window-countdown-label" lang="ar" dir="rtl"></span>
-          <strong id="window-countdown-value">--</strong>
-        </div>
-      </section>
+  <section class="session" aria-label="Fortschritt">
+    <div class="session-meta">
+      <span id="page-label">1 / 23</span>
+      <span id="date-label"></span>
+    </div>
+    <div class="progress-track" role="progressbar" aria-label="Athkar-Fortschritt" aria-valuemin="1" aria-valuemax="23" aria-valuenow="1">
+      <div class="progress-value" id="progress-value"></div>
+    </div>
+    <div class="window-countdown" aria-live="polite">
+      <span id="window-countdown-label" lang="ar" dir="rtl"></span>
+      <strong id="window-countdown-value">--</strong>
+    </div>
+  </section>
 
-      <section class="reading-card" id="athkar-panel" role="tabpanel" aria-labelledby="reading-heading">
-        <h2 id="reading-heading" class="visually-hidden">Aktuelle Erinnerung</h2>
-        <div class="reading-scroll">
-          <p class="arabic" id="arabic-text" lang="ar" dir="rtl"></p>
-        </div>
-        <div class="counter" aria-live="polite">
-          <span class="counter-caption">Wiederholungen</span>
-          <span class="counter-value" id="count-label">0 <span>/ 1</span></span>
-        </div>
-      </section>
+  <section class="reading-card" id="athkar-panel" role="tabpanel" aria-labelledby="reading-heading">
+    <h2 id="reading-heading" class="visually-hidden">Aktuelle Erinnerung</h2>
+    <div class="reading-scroll">
+      <p class="arabic" id="arabic-text" lang="ar" dir="rtl"></p>
+    </div>
+    <div class="counter" aria-live="polite">
+      <span class="counter-caption">Wiederholungen</span>
+      <span class="counter-value" id="count-label">0 <span>/ 1</span></span>
+    </div>
+  </section>
 
-      <p class="hint" id="hint-label">In Ruhe lesen und anschließend zählen</p>
+  <p class="hint" id="hint-label">In Ruhe lesen und anschließend zählen</p>
 
-      <div class="controls">
-        <button class="secondary-button" id="previous-button" type="button" aria-label="Vorherige Erinnerung">Zurück</button>
-        
-        <button class="count-button" id="count-button" type="button">+ Zählen</button>
+  <div class="controls">
+    <button class="secondary-button" id="previous-button" type="button" aria-label="Vorherige Erinnerung">Zurück</button>
 
-        <button class="secondary-button" id="next-button" type="button" aria-label="Nächste Erinnerung">Weiter</button>
-      </div>
+    <button class="count-button" id="count-button" type="button">+ Zählen</button>
 
-      <footer class="footer">
-        <div class="footer-status">
-          <span id="session-label">Sitzung&nbsp; 0h 0m</span>
-          <span id="clock-label">--:--</span>
-        </div>
+    <button class="secondary-button" id="next-button" type="button" aria-label="Nächste Erinnerung">Weiter</button>
+  </div>
 
-      <div class="developer-credit">
+  <footer class="footer">
+    <div class="footer-status">
+      <span id="session-label">Sitzung&nbsp; 0h 0m</span>
+      <span id="clock-label">--:--</span>
+    </div>
+
+    <div class="developer-credit">
         <span>
           Developed by Mohammed Ali Anis •
           <a href="mailto:moh.ali.anis@gmail.com">
             moh.ali.anis@gmail.com
           </a>
         </span>
-      
-        <span class="deployment-info" id="deployment-date">
+
+      <span class="deployment-info" id="deployment-date">
           Deployment: Wird geladen...
         </span>
-      </div>
+    </div>
 
-      </footer>
-    </main>
-    <input
-      type="checkbox"
-      switch
-      id="ios-haptic-count"
-      class="ios-haptic-overlay"
-      aria-label="Zählen"
-      hidden
-    >
-  </body>
+  </footer>
+</main>
+<input
+        type="checkbox"
+        switch
+        id="ios-haptic-count"
+        class="ios-haptic-overlay"
+        aria-label="Zählen"
+        hidden
+>
+</body>
 </html>
