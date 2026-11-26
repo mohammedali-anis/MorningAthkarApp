@@ -161,21 +161,21 @@ h1 { margin: 0; font-size: clamp(1.15rem, 5vw, 1.5rem); letter-spacing: -.025em;
   font-size: clamp(1.35rem, 5.5vw, 2.2rem);
   line-height: 1.75;
 }
-.counter { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 10px; }
+.counter { display: flex; align-items: center; justify-content: center; gap: 8px; padding-top: 4px; }
 .counter-ring {
   --ring-progress: 0%;
-  width: 62px; height: 62px; flex: none; display: grid; place-items: center;
+  width: 42px; height: 42px; flex: none; display: grid; place-items: center;
   border-radius: 50%;
   background: conic-gradient(var(--green) var(--ring-progress), var(--edge) 0);
   box-shadow: 0 0 0 1px var(--edge);
 }
 .counter-ring-inner {
-  width: 54px; height: 54px; display: grid; place-items: center;
+  width: 36px; height: 36px; display: grid; place-items: center;
   border-radius: 50%; background: var(--panel);
 }
-.counter-value { display: grid; color: var(--green); font-size: 1.13rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; line-height: 1.1; }
-.counter-value small { color: var(--muted); font-size: .59rem; font-weight: 600; }
-.counter-caption { color: var(--muted); font-size: .8rem; font-weight: 650; }
+.counter-value { display: grid; color: var(--green); font-size: .86rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; line-height: 1.1; }
+.counter-value small { color: var(--muted); font-size: .45rem; font-weight: 600; }
+.counter-caption { color: var(--muted); font-size: .72rem; font-weight: 650; }
 .counter-ring.is-complete { animation: ring-glow .65s ease-out; }
 @keyframes ring-glow {
   0% { box-shadow: 0 0 0 1px var(--green), 0 0 0 0 var(--count-shadow); }
@@ -280,8 +280,8 @@ button:disabled { opacity: .42; cursor: default; }
 @media (max-height: 680px) and (max-width: 559px) {
   .app-shell { gap: 12px; padding-top: max(12px, env(safe-area-inset-top)); }
   .arabic { font-size: clamp(1.2rem, 5.2vw, 1.8rem); }
-  .counter-ring { width: 52px; height: 52px; }
-  .counter-ring-inner { width: 45px; height: 45px; }
+  .counter-ring { width: 38px; height: 38px; }
+  .counter-ring-inner { width: 32px; height: 32px; }
   .count-button { width: 64px; height: 64px; min-height: 64px; }
   .count-fingerprint { width: 21px; height: 21px; }
   .completion-view { gap: 6px; }
