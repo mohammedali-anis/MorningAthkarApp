@@ -204,13 +204,13 @@ h1 { margin: 0; font-size: clamp(1.15rem, 5vw, 1.5rem); letter-spacing: -.025em;
 .completion-stats span { color: var(--muted); font-size: .72rem; }
 .review-button { min-height: 38px; margin-top: 4px; padding: 6px 18px; border: 1px solid var(--green); border-radius: 11px; background: var(--control); color: var(--green); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
 .hint { min-height: 1.25em; margin: 0; color: var(--muted); text-align: center; font-size: .82rem; }
-.controls { display: grid; grid-template-columns: minmax(70px, .85fr) minmax(112px, 1.4fr) minmax(70px, .85fr); align-items: center; gap: 10px; }
+.controls { display: grid; grid-template-columns: minmax(70px, .85fr) minmax(90px, 1.4fr) minmax(70px, .85fr); align-items: center; gap: 10px; }
 .controls #next-button[hidden] { display: none; }
 .secondary-button { background: var(--control); font-size: .93rem; font-weight: 700; }
-.count-button { width: 112px; height: 112px; min-height: 112px; justify-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-color: color-mix(in srgb, var(--green) 70%, var(--edge)); border-radius: 50%; background: color-mix(in srgb, var(--green) 18%, var(--panel)); color: var(--green); font-size: .84rem; font-weight: 650; box-shadow: none; }
+.count-button { width: 72px; height: 72px; min-height: 72px; justify-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-color: color-mix(in srgb, var(--green) 70%, var(--edge)); border-radius: 50%; background: color-mix(in srgb, var(--green) 18%, var(--panel)); color: var(--green); font-size: .7rem; font-weight: 650; box-shadow: none; }
 .count-button:hover { background: color-mix(in srgb, var(--green) 25%, var(--panel)); }
-.count-fingerprint { width: 34px; height: 34px; }
-.count-next-icon { display: none; font-size: 2rem; line-height: 1; }
+.count-fingerprint { width: 24px; height: 24px; }
+.count-next-icon { display: none; font-size: 1.5rem; line-height: 1; }
 .count-button.is-next .count-fingerprint { display: none; }
 .count-button.is-next .count-next-icon { display: block; }
 .count-button:disabled { border-color: var(--edge); background: var(--control); color: var(--green); box-shadow: none; opacity: .85; }
@@ -282,8 +282,8 @@ button:disabled { opacity: .42; cursor: default; }
   .arabic { font-size: clamp(1.2rem, 5.2vw, 1.8rem); }
   .counter-ring { width: 52px; height: 52px; }
   .counter-ring-inner { width: 45px; height: 45px; }
-  .count-button { width: 86px; height: 86px; min-height: 86px; }
-  .count-fingerprint { width: 28px; height: 28px; }
+  .count-button { width: 64px; height: 64px; min-height: 64px; }
+  .count-fingerprint { width: 21px; height: 21px; }
   .completion-view { gap: 6px; }
   .completion-mark { width: 48px; height: 48px; font-size: 1.5rem; }
 }
