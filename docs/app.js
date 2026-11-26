@@ -7,6 +7,9 @@ const sessionStartedAt = Date.now();
 
 const elements = {
   page: document.querySelector("#page-label"),
+  progressPercent: document.querySelector("#progress-percent"),
+  progressCount: document.querySelector("#progress-count"),
+  progressRing: document.querySelector("#progress-ring"),
   date: document.querySelector("#date-label"),
   progress: document.querySelector("#progress-value"),
   progressTrack: document.querySelector(".progress-track"),
@@ -14,8 +17,18 @@ const elements = {
   windowCountdownValue: document.querySelector("#window-countdown-value"),
   arabic: document.querySelector("#arabic-text"),
   count: document.querySelector("#count-label"),
+  counterRing: document.querySelector("#counter-ring"),
+  readingContent: document.querySelector("#reading-content"),
+  completionView: document.querySelector("#completion-view"),
+  completionTitle: document.querySelector("#completion-title"),
+  completionMessage: document.querySelector(".completion-message"),
+  completionTotal: document.querySelector("#completion-total"),
+  completionDuration: document.querySelector("#completion-duration"),
+  reviewButton: document.querySelector("#review-button"),
   hint: document.querySelector("#hint-label"),
   countButton: document.querySelector("#count-button"),
+  countButtonLabel: document.querySelector("#count-button-label"),
+  controls: document.querySelector(".controls"),
   themeButton: document.querySelector("#theme-button"),
   themeIcon: document.querySelector("#theme-icon"),
   screenWakeButton: document.querySelector("#screen-wake-button"),
@@ -38,9 +51,10 @@ let routines = { morning: [], evening: [] };
 let activeRoutine = "morning";
 
 let progressByRoutine = {
-  morning: { currentIndex: 0, count: 0 },
-  evening: { currentIndex: 0, count: 0 },
+  morning: { currentIndex: 0, count: 0, completed: [] },
+  evening: { currentIndex: 0, count: 0, completed: [] },
 };
+let completionDismissed = { morning: false, evening: false };
 
 let currentIndex = 0;
 let count = 0;
@@ -72,20 +86,20 @@ function applyTheme(theme, save = false) {
   elements.themeButton.setAttribute(
       "aria-label",
       dark
-          ? "Originalmodus aktivieren"
-          : "Darkmodus aktivieren"
+          ? "Grünen Modus aktivieren"
+          : "Midnight-Modus aktivieren"
   );
   
   elements.themeButton.title = dark
-      ? "Originalmodus aktivieren"
-      : "Darkmodus aktivieren";
+      ? "Grünen Modus aktivieren"
+      : "Midnight-Modus aktivieren";
   
   elements.themeIcon.textContent =
       String.fromCodePoint(dark ? 0x2600 : 0x263e);
   
   document.querySelector(
       'meta[name="theme-color"]'
-  ).content = dark ? "#080d0b" : "#101815";
+  ).content = dark ? "#030711" : "#080d0b";
   
   if (!save) return;
   
@@ -360,18 +374,18 @@ function renderPrayerCountdown() {
   
   const now = Date.now();
   
-  if (
-      now < start.getTime() ||
-      now >= end.getTime()
-  ) {
+  if (now < start.getTime() || now >= end.getTime()) {
+    const nextStart = new Date(start);
+    const tomorrow = now >= end.getTime();
+    if (tomorrow) nextStart.setDate(nextStart.getDate() + 1);
     elements.windowCountdownLabel.textContent =
-        isMorning
-            ? "ليس وقت أذكار الصباح"
-            : "ليس وقت أذكار المساء";
-    
-    elements.windowCountdownValue.textContent =
-        "--";
-    
+        (isMorning
+            ? "المتبقي حتى بداية أذكار الصباح"
+            : "المتبقي حتى بداية أذكار المساء") +
+        (tomorrow ? " (تقريبًا)" : "");
+    elements.windowCountdownValue.textContent = formatDuration(
+        Math.max(0, Math.ceil((nextStart.getTime() - now) / 60_000))
+    );
     return;
   }
   
@@ -415,6 +429,13 @@ function formatDuration(totalMinutes) {
 // PROGRESS
 // ==========================================
 
+function sanitizeCompleted(completed, list) {
+  if (!Array.isArray(completed)) return [];
+  return [...new Set(completed.filter(
+      (index) => Number.isInteger(index) && index >= 0 && index < list.length
+  ))];
+}
+
 function loadProgress() {
   try {
     const saved = JSON.parse(
@@ -452,7 +473,15 @@ function loadProgress() {
                   list[index].targetCount
               )
           ),
+          completed: sanitizeCompleted(state.completed, list),
         };
+        if (progressByRoutine[routine].count >= list[index].targetCount &&
+            !progressByRoutine[routine].completed.includes(index)) {
+          progressByRoutine[routine].completed.push(index);
+        }
+        if (progressByRoutine[routine].completed.includes(index)) {
+          progressByRoutine[routine].count = list[index].targetCount;
+        }
       }
     } else if (routines.morning.length) {
       // Carry forward progress saved by
@@ -475,12 +504,16 @@ function loadProgress() {
                 routines.morning[index].targetCount
             )
         ),
+        completed: [],
       };
+      if (progressByRoutine.morning.count >= routines.morning[index].targetCount) {
+        progressByRoutine.morning.completed.push(index);
+      }
     }
   } catch {
     progressByRoutine = {
-      morning: { currentIndex: 0, count: 0 },
-      evening: { currentIndex: 0, count: 0 },
+      morning: { currentIndex: 0, count: 0, completed: [] },
+      evening: { currentIndex: 0, count: 0, completed: [] },
     };
   }
   
@@ -489,6 +522,7 @@ function loadProgress() {
 
 function rememberActiveProgress() {
   progressByRoutine[activeRoutine] = {
+    ...progressByRoutine[activeRoutine],
     currentIndex,
     count,
   };
@@ -538,6 +572,10 @@ function render() {
   
   const showingPrayerTimes =
       elements.shell.dataset.view === "prayer";
+  const completedCount = progressByRoutine[activeRoutine].completed.length;
+  const progressPercent = Math.round((completedCount / athkar.length) * 100);
+  const showCompletion = completedCount === athkar.length &&
+      !completionDismissed[activeRoutine];
   
   if (!showingPrayerTimes) {
     elements.routineEyebrow.textContent =
@@ -574,10 +612,15 @@ function render() {
   renderPrayerCountdown();
   
   elements.page.textContent =
-      `${currentIndex + 1} / ${athkar.length}`;
+      `Seite ${currentIndex + 1} / ${athkar.length}`;
+  elements.progressPercent.textContent = `${progressPercent}%`;
+  elements.progressCount.textContent = `${completedCount} / ${athkar.length}`;
+  elements.progressRing.style.setProperty(
+      "--progress-ring", `${(completedCount / athkar.length) * 100}%`
+  );
   
   elements.progress.style.width =
-      `${((currentIndex + 1) / athkar.length) * 100}%`;
+      `${(completedCount / athkar.length) * 100}%`;
   
   elements.progressTrack.setAttribute(
       "aria-valuemax",
@@ -586,34 +629,63 @@ function render() {
   
   elements.progressTrack.setAttribute(
       "aria-valuenow",
-      String(currentIndex + 1)
+      String(completedCount)
   );
+  elements.progressTrack.setAttribute("aria-valuetext", `${progressPercent}% abgeschlossen`);
   
   elements.arabic.textContent =
       dhikr.arabicText;
   
   elements.count.innerHTML =
-      `${count} <span>/ ${dhikr.targetCount}</span>`;
+      `${count}<small>von ${dhikr.targetCount}</small>`;
+  elements.counterRing.style.setProperty(
+      "--ring-progress", `${(count / dhikr.targetCount) * 100}%`
+  );
+  elements.counterRing.setAttribute(
+      "aria-label", `${count} von ${dhikr.targetCount} Wiederholungen`
+  );
+  elements.counterRing.classList.toggle("is-complete", complete);
+
+  elements.readingContent.hidden = showCompletion;
+  elements.completionView.hidden = !showCompletion;
+  elements.readingArea.classList.toggle("is-finished", showCompletion);
+  elements.hint.hidden = showCompletion;
+  elements.controls.hidden = showCompletion;
+  if (showCompletion) {
+    elements.completionTitle.textContent = isMorning
+        ? "الحمد لله، أتممت أذكار الصباح"
+        : "الحمد لله، أتممت أذكار المساء";
+    elements.completionMessage.textContent = isMorning
+        ? "جعل الله يومك مليئًا بالبركة والسكينة والطمأنينة"
+        : "جعل الله ليلتك مليئة بالسكينة والطمأنينة";
+    elements.completionTotal.textContent = `${completedCount} / ${athkar.length}`;
+    elements.completionDuration.textContent = formatDuration(
+        Math.floor((Date.now() - sessionStartedAt) / 60_000)
+    );
+  }
   
   elements.previous.disabled =
       currentIndex === 0;
   
-  elements.next.disabled =
-      currentIndex === athkar.length - 1;
-  
-  elements.countButton.textContent =
-      complete
-          ? (
-              currentIndex < athkar.length - 1
-                  ? "Weiter"
-                  : "Fertig ✓"
-          )
-          : "+ Zählen";
-  
-  elements.hint.textContent =
-      complete
-          ? "Abgeschlossen · Weiter zur nächsten Erinnerung"
-          : "In Ruhe lesen und anschließend zählen";
+  const isLastPage = currentIndex === athkar.length - 1;
+  elements.next.disabled = isLastPage && !complete;
+  elements.next.hidden = complete;
+  elements.countButton.classList.toggle("is-next", complete);
+  elements.next.textContent = isLastPage
+      ? (completedCount === athkar.length
+          ? "Abschluss"
+          : (complete ? "Offene Athkar" : "Weiter"))
+      : "Weiter";
+  elements.countButton.disabled = false;
+  elements.countButtonLabel.textContent = complete ? "Weiter" : "Zählen";
+
+  elements.hint.textContent = complete
+      ? (completedCount === athkar.length
+          ? "Alle Athkar gezählt · Weiter zur Abschlussseite"
+          : (isLastPage
+              ? "Noch offene Athkar lesen"
+              : "Abgeschlossen · Weiter zur nächsten Erinnerung"))
+      : "In Ruhe lesen und anschließend zählen";
   
   elements.date.textContent =
       new Intl.DateTimeFormat("de-DE", {
@@ -622,7 +694,7 @@ function render() {
         month: "short",
       }).format(new Date());
   
-  window.requestAnimationFrame(fitArabicText);
+  if (!showCompletion) window.requestAnimationFrame(fitArabicText);
   
   // ========================================
   // NEU: iPhone-Haptik aktualisieren
@@ -752,7 +824,9 @@ function showDhikr(index) {
       index !== currentIndex;
   
   currentIndex = index;
-  count = 0;
+  count = progressByRoutine[activeRoutine].completed.includes(index)
+      ? athkar[index].targetCount
+      : 0;
   
   if (pageChanged) {
     vibrateOnPageChange();
@@ -764,24 +838,47 @@ function showDhikr(index) {
 function countOrAdvance() {
   const athkar = routines[activeRoutine];
   
-  if (!athkar.length) return;
+  if (!athkar.length || !elements.completionView.hidden) return;
   
   const dhikr = athkar[currentIndex];
   
-  if (count < dhikr.targetCount) {
-    count += 1;
-    
-    if (count === dhikr.targetCount) {
-      giveCountCompleteFeedback();
-    }
-  } else if (
-      currentIndex < athkar.length - 1
-  ) {
-    currentIndex += 1;
-    count = 0;
+  if (count >= dhikr.targetCount) {
+    goToNextDhikr();
+    return;
+  }
+  count += 1;
+
+  if (count === dhikr.targetCount) {
+    const completed = progressByRoutine[activeRoutine].completed;
+    if (!completed.includes(currentIndex)) completed.push(currentIndex);
+    completionDismissed[activeRoutine] = true;
+    giveCountCompleteFeedback();
   }
   
   render();
+}
+
+function goToNextDhikr() {
+  const athkar = routines[activeRoutine];
+  const completed = progressByRoutine[activeRoutine].completed;
+  if (completed.length === athkar.length) {
+    completionDismissed[activeRoutine] = false;
+    render();
+    return;
+  }
+
+  if (currentIndex < athkar.length - 1) {
+    showDhikr(currentIndex + 1);
+    return;
+  }
+
+  const nextOpen = athkar.findIndex((_, index) => !completed.includes(index));
+  if (nextOpen >= 0) {
+    showDhikr(nextOpen);
+  } else {
+    completionDismissed[activeRoutine] = false;
+    render();
+  }
 }
 
 
@@ -800,17 +897,21 @@ function updateClocks() {
       morning: {
         currentIndex: 0,
         count: 0,
+        completed: [],
       },
       evening: {
         currentIndex: 0,
         count: 0,
+        completed: [],
       },
     };
     
     currentIndex = 0;
     count = 0;
+    completionDismissed = { morning: false, evening: false };
     
     render();
+    loadPrayerTimes();
   }
   
   const elapsedMinutes = Math.floor(
@@ -819,6 +920,9 @@ function updateClocks() {
   
   elements.session.textContent =
       `Sitzung  ${formatDuration(elapsedMinutes)}`;
+  if (!elements.completionView.hidden) {
+    elements.completionDuration.textContent = formatDuration(elapsedMinutes);
+  }
   
   elements.clock.textContent =
       new Intl.DateTimeFormat("de-DE", {
@@ -844,15 +948,18 @@ function persistProgressForCurrentDay() {
       morning: {
         currentIndex: 0,
         count: 0,
+        completed: [],
       },
       evening: {
         currentIndex: 0,
         count: 0,
+        completed: [],
       },
     };
     
     currentIndex = 0;
     count = 0;
+    completionDismissed = { morning: false, evening: false };
     
     render();
     return;
@@ -1113,14 +1220,28 @@ elements.previous.addEventListener(
 
 elements.next.addEventListener(
     "click",
-    () => showDhikr(currentIndex + 1)
+    goToNextDhikr
 );
 
 document.querySelector("#reset-button")
     .addEventListener(
         "click",
-        () => showDhikr(0)
+        () => {
+          progressByRoutine[activeRoutine] = {
+            currentIndex: 0,
+            count: 0,
+            completed: [],
+          };
+          currentIndex = 0;
+          count = 0;
+          completionDismissed[activeRoutine] = false;
+          render();
+        }
     );
+elements.reviewButton.addEventListener("click", () => {
+  completionDismissed[activeRoutine] = true;
+  showDhikr(0);
+});
 
 window.addEventListener(
     "resize",

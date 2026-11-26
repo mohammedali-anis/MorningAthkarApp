@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#101815">
+  <meta name="theme-color" content="#080d0b">
   <meta name="description" content="Morgen- und Abend-Athkar sowie Gebetszeiten der Bilal-Moschee in Siegen.">
   <title>Athkar &amp; Gebetszeiten</title>
   <link rel="manifest" href="./manifest.webmanifest">
@@ -13,6 +13,7 @@
     try {
       if (localStorage.getItem("morning-athkar-theme-v1") === "dark") {
         document.documentElement.dataset.theme = "dark";
+        document.querySelector('meta[name="theme-color"]').content = "#030711";
       }
     } catch {
       // Keep the original appearance if browser storage is unavailable.
@@ -29,11 +30,11 @@
       <span class="eyebrow" id="routine-eyebrow">MORGENROUTINE</span>
       <h1 id="routine-title">Deine Morgen-Athkar</h1>
     </div>
-    <button class="icon-button" id="theme-button" type="button" aria-label="Darkmodus aktivieren" title="Darkmodus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
+    <button class="icon-button" id="theme-button" type="button" aria-label="Midnight-Modus aktivieren" title="Midnight-Modus aktivieren" aria-pressed="false"><span id="theme-icon" aria-hidden="true">&#x263E;</span></button>
     <button class="icon-button" id="screen-wake-button" type="button" aria-label="Bildschirm wach halten aktivieren" title="Bildschirm wach halten aktivieren" aria-pressed="false">
       <img class="wake-screen-icon" src="./icons/screen-wake.png" alt="">
     </button>
-    <button class="icon-button" id="reset-button" type="button" aria-label="Zur ersten Erinnerung" title="Zum Anfang">↺</button>
+    <button class="icon-button" id="reset-button" type="button" aria-label="Fortschritt zurücksetzen" title="Fortschritt zurücksetzen">↺</button>
   </header>
 
   <nav class="routine-tabs" role="tablist" aria-label="App-Bereich auswählen" lang="ar" dir="rtl">
@@ -58,27 +59,53 @@
   </section>
 
   <section class="session" aria-label="Fortschritt">
-    <div class="session-meta">
-      <span id="page-label">1 / 23</span>
-      <span id="date-label"></span>
+    <div class="progress-badge">
+      <div class="progress-ring" id="progress-ring">
+        <div class="progress-ring-inner">
+          <strong id="progress-percent">0%</strong>
+          <small id="progress-count">0 / 23</small>
+        </div>
+      </div>
+      <span>Fortschritt</span>
     </div>
-    <div class="progress-track" role="progressbar" aria-label="Athkar-Fortschritt" aria-valuemin="1" aria-valuemax="23" aria-valuenow="1">
-      <div class="progress-value" id="progress-value"></div>
-    </div>
-    <div class="window-countdown" aria-live="polite">
-      <span id="window-countdown-label" lang="ar" dir="rtl"></span>
-      <strong id="window-countdown-value">--</strong>
+    <div class="session-body">
+      <div class="session-meta">
+        <span id="page-label">Seite 1 / 23</span>
+        <span id="date-label"></span>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="Abgeschlossene Athkar" aria-valuemin="0" aria-valuemax="23" aria-valuenow="0">
+        <div class="progress-value" id="progress-value"></div>
+      </div>
+      <div class="window-countdown" aria-live="polite">
+        <span id="window-countdown-label" lang="ar" dir="rtl"></span>
+        <strong id="window-countdown-value">--</strong>
+      </div>
     </div>
   </section>
 
   <section class="reading-card" id="athkar-panel" role="tabpanel" aria-labelledby="reading-heading">
     <h2 id="reading-heading" class="visually-hidden">Aktuelle Erinnerung</h2>
-    <div class="reading-scroll">
-      <p class="arabic" id="arabic-text" lang="ar" dir="rtl"></p>
+    <div class="reading-content" id="reading-content">
+      <div class="reading-scroll">
+        <p class="arabic" id="arabic-text" lang="ar" dir="rtl"></p>
+      </div>
+      <div class="counter" aria-live="polite">
+        <div class="counter-ring" id="counter-ring" role="img" aria-label="0 von 1 Wiederholungen">
+          <div class="counter-ring-inner"><span class="counter-value" id="count-label">0 <small>von 1</small></span></div>
+        </div>
+        <span class="counter-caption">Wiederholungen</span>
+      </div>
     </div>
-    <div class="counter" aria-live="polite">
-      <span class="counter-caption">Wiederholungen</span>
-      <span class="counter-value" id="count-label">0 <span>/ 1</span></span>
+    <div class="completion-view" id="completion-view" role="status" aria-live="polite" hidden>
+      <div class="completion-mark" aria-hidden="true">✓</div>
+      <p class="completion-arabic" lang="ar" dir="rtl">تقبّل الله منك</p>
+      <h2 id="completion-title" lang="ar" dir="rtl">الحمد لله، أتممت أذكار الصباح</h2>
+      <p class="completion-message" lang="ar" dir="rtl">جعل الله يومك مليئًا بالبركة والسكينة والطمأنينة</p>
+      <div class="completion-stats">
+        <div><strong id="completion-total">23 / 23</strong><span>Abgeschlossen</span></div>
+        <div><strong id="completion-duration">0h 0m</strong><span>Sitzungsdauer</span></div>
+      </div>
+      <button class="review-button" id="review-button" type="button">Noch einmal lesen</button>
     </div>
   </section>
 
@@ -87,7 +114,17 @@
   <div class="controls">
     <button class="secondary-button" id="previous-button" type="button" aria-label="Vorherige Erinnerung">Zurück</button>
 
-    <button class="count-button" id="count-button" type="button">+ Zählen</button>
+    <button class="count-button" id="count-button" type="button">
+      <svg class="count-fingerprint" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 20a13 13 0 0 1 26 0"/>
+        <path d="M10 25v-5a10 10 0 0 1 20 0v5"/>
+        <path d="M14 27v-7a6 6 0 0 1 12 0v8"/>
+        <path d="M18 28v-8a2 2 0 0 1 4 0v8"/>
+        <path d="M8 28c2.1-2.2 3-4.8 3-8M12 32c2.8-2.5 4-5.7 4-10M18 34c1.6-2 2.5-4.5 2.5-7M24 33c2.4-2.8 3.5-6 3.5-10M29 30c2-2.3 3-5.2 3-8"/>
+      </svg>
+      <span class="count-next-icon" aria-hidden="true">→</span>
+      <span id="count-button-label">Zählen</span>
+    </button>
 
     <button class="secondary-button" id="next-button" type="button" aria-label="Nächste Erinnerung">Weiter</button>
   </div>
